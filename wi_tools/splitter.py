@@ -1,8 +1,9 @@
 import hashlib
 import json
+import pandas as pd
 
 
-def get_splits_signature(splits):
+def get_splits_signature(splits: list[list[str]]) -> str:
     # сортируем внутри каждого сплита и сами сплиты
     normalized = [sorted(split) for split in splits]
     normalized = sorted(normalized)
@@ -11,10 +12,10 @@ def get_splits_signature(splits):
     return hashlib.md5(s.encode()).hexdigest()
 
 
-def split_by_deployment(df, n, signature=None):
+def split_by_deployment(df: pd.DataFrame, n: int, signature: str = None) -> list[pd.DataFrame]:
     group_sizes = (df.groupby('deployment_id').size().reset_index(name='size')
                    .sort_values(['size', 'deployment_id'], ascending=[False, True], kind='mergesort'))
-    splits = [[] for _ in range(n)]
+    splits: list[list[str]] = [[] for _ in range(n)]
     split_sizes = [0] * n
 
     for _, row in group_sizes.iterrows():
@@ -27,7 +28,7 @@ def split_by_deployment(df, n, signature=None):
         current_signature = get_splits_signature(splits)
         assert current_signature == signature, f"Wrong signature: {current_signature} != {signature}"
 
-    df_parts = []
+    df_parts: list[pd.DataFrame] = []
     for split_groups in splits:
         df_parts.append(df[df['deployment_id'].isin(split_groups)])
 

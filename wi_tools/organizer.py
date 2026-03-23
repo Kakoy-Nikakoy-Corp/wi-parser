@@ -4,7 +4,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 
-def organize_images(df, label):
+def organize_images(df: pd.DataFrame, label: str) -> None:
     output_path = Path('./output') / label
     downloads_path = Path('./download') / label
 
@@ -12,10 +12,10 @@ def organize_images(df, label):
     df_sorted = df.sort_values(by=["deployment_id", "timestamp"], ascending=True).reset_index(drop=True)
 
     # Track current number for each deployment
-    deployment_counters = {}
+    deployment_counters: dict[str, int] = {}
 
-    # Process rows — copy with sequential numbering per deployment
-    kept_rows = []
+    # Process rows - copy with sequential numbering per deployment
+    kept_rows: list[pd.Series] = []
     for _, row in tqdm(df_sorted.iterrows(), total=len(df_sorted), desc="Organizing images"):
         source_path = downloads_path / f"{row['image_id']}.jpg"
 
